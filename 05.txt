@@ -1,0 +1,65 @@
+use ass4;
+
+// 1. Find the average price of all books.
+db.books.aggregate([
+  {
+    $group: {
+      _id: null,  // No grouping field, we just want the overall average
+      averagePrice: { $avg: "$price" }
+    }
+  }
+]);
+
+// 2. Find the count of books in each genre.
+db.books.aggregate([
+  {
+    $group: {
+      _id: "$genre",  // Group by genre
+      count: { $sum: 1 }  // Count the number of books per genre
+    }
+  }
+]);
+
+// 3. For each genre, find the most expensive book.
+db.books.aggregate([
+  {
+    $group: {
+      _id: "$genre",  // Group by genre
+      mostExpensiveBook: { $max: "$price" }  // Find the most expensive book in each genre
+    }
+  }
+]);
+
+// 4. Find the authors who have written the maximum books.
+db.books.aggregate([
+  {
+    $group: {
+      _id: "$author",  // Group by author
+      bookCount: { $sum: 1 }  // Count the number of books per author
+    }
+  },
+  {
+    $sort: { bookCount: -1 }  // Sort by book count in descending order
+  },
+  {
+    $limit: 1  // Only return the author(s) with the most books
+  }
+]);
+
+// 5. Sort the books by published_date in descending order.
+db.books.aggregate([
+  {
+    $sort: { published_date: -1 }  // Sort by published_date in descending order
+  }
+]);
+
+// 6. Sort the price in ascending order.
+db.books.aggregate([
+  {
+    $sort: { price: 1 }  // Sort by price in ascending order
+  }
+]);
+
+// 7. Create an index on the title of the book and describe the index details.
+db.books.createIndex({ title: 1 });  // Create an ascending index on the title field
+db.books.getIndexes();  // Describe the index details
