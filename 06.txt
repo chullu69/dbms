@@ -1,0 +1,25 @@
+use ass6;
+
+// Insert sample documents into the collection
+db.customer.insertMany([
+  { cid: 1, cname: "ABC", amount: 2000, product_name: "Iphone Charger" },
+  { cid: 2, cname: "XYZ", amount: 40000, product_name: "Iphone 13" },
+  { cid: 3, cname: "PQR", amount: 50000, product_name: "Samsung S23 FE" },
+  { cid: 4, cname: "MNO", amount: 55000, product_name: "Iphone 14" }
+]);
+
+// Define the Map function
+var Mapfunction = function() {
+  emit(this.cid, this.amount); // Emit customer ID and amount spent
+};
+
+// Define the Reduce function
+var Reducefunction = function(key, values) {
+  return Array.sum(values); // Sum all amounts for each customer ID
+};
+
+// Perform MapReduce and output to the 'customer_summary' collection
+db.customer.mapReduce(Mapfunction, Reducefunction, { out: "customer_summary" });
+
+// Query the result from the 'customer_summary' collection
+db.customer_summary.find();
