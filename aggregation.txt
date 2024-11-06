@@ -1,31 +1,56 @@
-use ass4;
-db.Teachers.insertMany([
-  { Tname: "SSS", dno: 4, dname: "CS", experience: 13, salary: 35000, date_of_joining: "23.6.2020" },
-  { Tname: "VK", dno: 5, dname: "IT", experience: 10, salary: 25000, date_of_joining: "12.5.2018" },
-  { Tname: "JB", dno: 6, dname: "ENTC", experience: 2, salary: 9000, date_of_joining: "22.4.2022" },
-  { Tname: "XYZ", dno: 5, dname: "IT", experience: 11, salary: 15000, date_of_joining: "23.6.2015" },
-  { Tname: "PQR", dno: 4, dname: "CS", experience: 8, salary: 5000, date_of_joining: "7.9.2012" }
+use ass5;
+db.Books.insertMany([
+  {
+    title: "Power of Subconscious Mind",
+    author: "Joseph",
+    genre: "Sci-Fi",
+    price: 150,
+    publish_date: "23.1.2021"
+  },
+  {
+    title: "Rich Dad Poor Dad",
+    author: "Robert",
+    genre: "Non Fiction",
+    price: 500,
+    publish_date: "12.3.2012"
+  },
+  {
+    title: "The Hundred",
+    author: "Sachin",
+    price: 1000,
+    publish_date: "06.8.2023"
+  },
+  {
+    title: "Playing it my way",
+    author: "Sachin",
+    genre: "Fiction",
+    price: 1200,
+    publish_date: "6.4.2020"
+  }
 ]);
-db.Teachers.find();
-db.Students.insertMany([
-  { Sname: "ABCD", rollno: 5, class: 9 },
-  { Sname: "PQRS", rollno: 2, class: 10 },
-  { Sname: "Rahul", rollno: 12, class: 9 }
+db.Books.insertMany([
+  {
+    title: "ABD",
+    author: "ab de Villiers",
+    genre: "Mystery",
+    price: 1500,
+    publish_date: "1.3.2015"
+  }
 ]);
-db.Teachers.find().sort({ Tname: 1 });
-db.Teachers.find({ dname: "CS" });
-db.Teachers.find({ dname: { $in: ["CS", "IT", "ENTC"] } });
-db.Teachers.find({ dname: { $in: ["CS", "IT", "ENTC"] }, salary: { $gte: 10000 } });
-db.Students.find({ $or: [{ Sname: "PQRS" }, { rollno: 2 }] });
-db.Teachers.update(
-  { Tname: "Praveen" },
-  { $set: { experience: 10 } },
-  { upsert: true }
-);
-db.Teachers.update(
-  { dname: "IT" },
-  { $set: { dname: "CS" } },
-  { multi: true }
-);
-db.Teachers.find({}, { Tname: 1, experience: 1 });
-db.Teachers.remove({ dname: "IT" });
+db.Books.aggregate([{ $group: { _id: null, avgprice: { $avg: "$price" } } }]);
+db.Books.insertMany([
+  {
+    title: "RDBMS",
+    author: "John",
+    genre: "Fiction",
+    price: 2000,
+    publish_date: "1.3.2015"
+  }
+]);
+db.Books.aggregate([{ $group: { _id: "$genre", mostexpensiveBook: { $max: "$price" } } }]);
+db.Books.aggregate([{ $group: { _id: "$genre", BookCount: { $sum: 1 } } }]);
+db.Books.aggregate([{ $group: { _id: "$author", maxwrittenBooks: { $sum: 1 } } }]);
+db.Books.aggregate([{ $sort: { publish_date: -1 } }]);
+db.Books.aggregate([{ $sort: { price: 1 } }]);
+db.Books.createIndex({ title: 1 });
+db.Books.getIndexes();
