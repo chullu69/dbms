@@ -1,0 +1,68 @@
+create table fine(rollno int, Date date, amt decimal(10,2));
+create table borrower(
+    rollno int, 
+    name varchar(100), 
+    date_of_issue date, 
+    name_of_book varchar(100), 
+    status varchar(10)
+);
+
+-- Inserting sample records into the borrower table
+insert into borrower values
+(1, 'ABC', '2024-07-11', 'DBMS', 'I'),
+(2, 'XYZ', '2024-09-15', 'AI', 'I'),
+(3, 'PQR', '2024-10-30', 'CN', 'I'),
+(4, 'MNO', '2024-10-01', 'HCI', 'I');
+
+delimiter //
+
+create procedure calfine2(IN rno int, IN bookName varchar(100))
+begin
+    declare dateofIssue date;
+    declare stat varchar(10);
+    declare days_late int;
+    declare fine_amt decimal(10,2);
+
+    -- Exception handling block: Check if the book is found
+    begin
+        select date_of_issue, status into dateofIssue, stat
+        from borrower
+        where rollno = rno and name_of_book = bookName;
+    exception
+        when no_data_found then
+            dbms_output.put_line('Record not found');
+            return; -- Exit procedure if no record found
+    end;
+
+    -- Calculate the number of days the book is overdue
+    set days_late = DATEDIFF(CURDATE(), dateofIssue);
+    
+    -- Fine calculation logic
+    if days_late > 30 then
+        set fine_amt = days_late * 50;
+    elseif days_late between 15 and 30 then
+        set fine_amt = days_late * 5;
+    else
+        set fine_amt = 0; -- No fine if returned within 15 days
+    end if;
+
+    -- Insert the fine record into the fine table
+    if fine_amt > 0 then
+        insert into fine values(rno, CURDATE(), fine_amt);
+    end if;
+
+    -- Update the borrower table with status 'R' (Returned)
+    update borrower
+    set status = 'R'
+    where rollno = rno and name_of_book = bookName;
+
+end //
+
+delimiter ;
+
+-- Call the procedure for a sample borrower and book
+call calfine2(1, 'DBMS');
+
+-- Display the results from the fine and borrower tables
+select * from fine;
+select * from borrower;
