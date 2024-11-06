@@ -1,0 +1,65 @@
+CREATE DATABASE rollcal;
+USE rollcal;
+
+-- Create tables
+CREATE TABLE oldRollCall (
+    rno INT PRIMARY KEY,
+    name VARCHAR(20)
+);
+
+-- Insert data into oldRollCall table
+INSERT INTO oldRollCall VALUES (1, 'ABC'), (2, 'XYZ'), (3, 'PQR');
+
+CREATE TABLE newRollCall (
+    rno INT,
+    name VARCHAR(20)
+);
+
+-- Insert data into newRollCall table
+INSERT INTO newRollCall VALUES (1, 'ABC'), (4, 'DEF'), (5, 'GHI');
+
+-- Merge procedure using parameterized cursor
+DELIMITER //
+CREATE PROCEDURE Merge()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE rollno INT;
+    DECLARE Sname VARCHAR(20);
+    
+    -- Declare cursor for newRollCall table
+    DECLARE c1 CURSOR FOR SELECT rno, name FROM newRollCall;
+    
+    -- Declare handler for the end of cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    -- Open the cursor
+    OPEN c1;
+    
+    -- Start the loop to read data
+    read_loop: LOOP
+        FETCH c1 INTO rollno, Sname;
+        
+        -- Exit the loop if no more data
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        
+        -- Check if the record exists in oldRollCall, and insert if not
+        IF NOT EXISTS (SELECT 1 FROM oldRollCall WHERE rno = rollno AND name = Sname) THEN
+            INSERT INTO oldRollCall (rno, name) VALUES (rollno, Sname);
+        END IF;
+        
+    END LOOP;
+    
+    -- Close the cursor
+    CLOSE c1;
+END;
+//
+DELIMITER ;
+
+-- Call the Merge procedure to merge data
+CALL Merge();
+
+-- View the data in both tables
+SELECT * FROM oldRollCall;
+SELECT * FROM newRollCall;
