@@ -1,0 +1,54 @@
+use ass4;
+
+// Insert Teachers Data
+db.Teachers.insertMany([
+  { Tname: "SSS", dno: 4, dname: "CS", experience: 13, salary: 35000, date_of_joining: "2020-06-23" },
+  { Tname: "VK", dno: 5, dname: "IT", experience: 10, salary: 25000, date_of_joining: "2018-05-12" },
+  { Tname: "JB", dno: 6, dname: "ENTC", experience: 2, salary: 9000, date_of_joining: "2022-04-22" },
+  { Tname: "XYZ", dno: 5, dname: "IT", experience: 11, salary: 15000, date_of_joining: "2015-06-23" },
+  { Tname: "PQR", dno: 4, dname: "CS", experience: 8, salary: 5000, date_of_joining: "2012-09-07" }
+]);
+
+// Insert Students Data
+db.Students.insertMany([
+  { Sname: "ABCD", rollno: 5, class: 9 },
+  { Sname: "PQRS", rollno: 2, class: 10 },
+  { Sname: "Rahul", rollno: 12, class: 9 }
+]);
+
+// Find teachers alphabetically
+db.Teachers.find().sort({ Tname: 1 });
+
+// Find teachers in the CS department
+db.Teachers.find({ dname: "CS" });
+
+// Find teachers in CS, IT, and ENTC departments
+db.Teachers.find({ dname: { $in: ["CS", "IT", "ENTC"] } });
+
+// Find teachers in CS, IT, and ENTC departments with salary >= 10000
+db.Teachers.find({ dname: { $in: ["CS", "IT", "ENTC"] }, salary: { $gte: 10000 } });
+
+// Find student by roll_no or Sname
+db.Students.find({ $or: [{ rollno: 2 }, { Sname: "PQRS" }] });
+
+// Update or insert Praveen's experience to 10
+db.Teachers.update(
+  { Tname: "Praveen" },
+  { $set: { experience: 10 } },
+  { upsert: true }
+);
+
+// Update all IT department teachers to CS
+db.Teachers.updateMany(
+  { dname: "IT" },
+  { $set: { dname: "CS" } }
+);
+
+// Find teacher names and experience
+db.Teachers.find({}, { Tname: 1, experience: 1 });
+
+// Delete all teachers in IT department
+db.Teachers.deleteMany({ dname: "IT" });
+
+// Display the first 3 teachers alphabetically in pretty format
+db.Teachers.find().sort({ Tname: 1 }).limit(3).pretty();
